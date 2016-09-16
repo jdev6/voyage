@@ -3,13 +3,10 @@ local shack  = require("lib.shack")
 local Entity = require("entity")
 local delay  = require("lib.delay")
 local audio  = require("lib.wave")
-local http   = require("socket.http")
-local ltn12  = require("ltn12")
 
 local g = love.graphics
 local fs = love.filesystem
 local rand = love.math.random
-local fmt = string.format
 
 --Constants
 local W,H = g.getDimensions()
@@ -21,6 +18,7 @@ local POWERUP_SPEED = 2
 local STAGE_DIFF    = (W-20)/8 --segment length
 local POWERUP_BONUS = 50
 local NODEATH_TIME  = 2
+local VERSION       = "1.0"
 
 local speed = 1
 
@@ -63,34 +61,9 @@ local ship
 
 local sounds = {}
 
-local VERSION_CHECK_URL = "https://raw.githubusercontent.com/jdev6/voyage/master/VERSION.txt"
-local VERSION = "1.0"
-local outdated = false
-
 function love.load()
 
     io.stdout:setvbuf("line")
-
-    --LOOK FOR UPDATES
-    
-    local resp = {}
-
-    local r, c, h, s = http.request {
-        url = VERSION_CHECK_URL,
-        sink = ltn12.sink.table(resp)
-    }
-
-    local v = resp[1]
-    
-    if v then
-        print(fmt("Current version: %s\nLatest version: %s", VERSION, v))
-        if v.."\n" ~= VERSION then
-            outdated = true
-            print (fmt("%q\n%q",VERSION,v))
-        end
-    else
-        print("Can't check for version")
-    end
 
     font = g.newFont("8bitoperator.ttf", 14)
 
@@ -223,6 +196,8 @@ function love.update(dt)
     end
 end
 
+local fmt = string.format
+
 function love.draw()
     g.setBackgroundColor(0,0,0)
 
@@ -236,9 +211,7 @@ function love.draw()
 
     g.setColor(SHIP_COLOR)
 
-    local scale = 1--sounds.bgloop:getEnergy()
-
-    ship:draw(ray.center.x, ray.center.y, scale)
+    ship:draw(ray.center.x, ray.center.y)
     if ship.nodeathTimer > 0 then
         g.circle("line", ship:getX(), ship:getY(), 24)
     end
@@ -259,13 +232,12 @@ function love.draw()
 
     if not playing then
         g.draw(keysImg, W/2-keysImg:getWidth()/2, H-keysImg:getHeight())
-        if outdated then
-            g.print("THERE'S A NEW VERSION AVAILABLE", 100,H/2)
-        end
+        --g.print("<              >", W/2-64, H-64)
     end
 
     if gameOver then
         g.print("PRESS TAB TO CHANGE COLORS", W/2-20,10)
+        g.print(fmt("V%s",VERSION), W-50 ,H-20)
 
         if hiScore > 0 then
             g.print("PRESS R TO RESET HIGH SCORE",10,H-25)
@@ -273,7 +245,7 @@ function love.draw()
     end
 
     if drawGameOver then
-        g.draw(gameOverImg, W/2-gameOverImg:getWidth()/2, 80)
+        g.draw(gameOverImg, W/2-gameOverImg:getWidth()/2, 60)
     end
 end
 
