@@ -63,7 +63,7 @@ local ship
 
 local sounds = {}
 
-local VERSION_CHECK_URL = "https://jdev6.github.io/voyage-version"
+local VERSION_CHECK_URL = "https://raw.githubusercontent.com/jdev6/voyage/master/VERSION.txt"
 local VERSION = "1.0"
 local outdated = false
 
@@ -84,8 +84,9 @@ function love.load()
     
     if v then
         print(fmt("Current version: %s\nLatest version: %s", VERSION, v))
-        if v ~= VERSION then
+        if v.."\n" ~= VERSION then
             outdated = true
+            print (fmt("%q\n%q",VERSION,v))
         end
     else
         print("Can't check for version")
@@ -258,7 +259,7 @@ function love.draw()
 
     if not playing then
         g.draw(keysImg, W/2-keysImg:getWidth()/2, H-keysImg:getHeight())
-        if true then
+        if outdated then
             g.print("THERE'S A NEW VERSION AVAILABLE", 100,H/2)
         end
     end
